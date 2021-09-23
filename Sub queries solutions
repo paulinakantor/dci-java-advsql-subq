@@ -1,0 +1,76 @@
+Sub queries solutions
+
+
+1. Return all customers listed in the orders table who placed orders on the most recently recorded day. 
+Time: ~ 10 min
+Level of Difficulty: low
+
+Solution: 
+
+select o.order_id, o.customer_id from orders o 
+where order_date = (select max(o2.order_date) from orders o2)
+
+
+2. Select all product names and prices that have unit price which is bigger than price of product with name 'Carnarvon Tigers'
+Time: ~ 10 min
+Level of Difficulty: low
+
+Solution: 
+
+select p.product_name, p.unit_price from products p 
+where p.unit_price > (select p2.unit_price from products p2 where p2.product_name='Carnarvon Tigers')
+
+
+3. Select customer ids and ther contact names that made order that was shipped to Brazil
+Time: ~ 10 min
+Level of Difficulty: medium
+
+Solution: 
+
+select c.customer_id, c.contact_name from customers c 
+where c.customer_id in (select o.customer_id from orders o where o.ship_country = 'Brazil')
+
+
+4. Select customer ids who ordered more than 20 items of product with name = 'Tofu' on a single order.
+Time: ~ 20 min
+Level of Difficulty: hard
+
+Solution: 
+
+select o.customer_id from orders o 
+where 20 < 
+(select od.quantity from order_details od 
+where od.order_id = o.order_id 
+and od.product_id = (select p.product_id from products p where p.product_name = 'Tofu'))
+
+
+5. Select only discounted products names, dicount value, category of it, and shipped date of order where this product occurs. Use join + sub query structure.
+
+Time: ~ 20 min
+Level of Difficulty: hard
+
+Solution:
+
+select o.shipped_date, b.productName, b.categoryName, b.discount
+from orders o 
+inner join
+  (
+    SELECT od.order_id as orderId, p.product_name as productName, c.category_name as categoryName, od.discount as discount
+    FROM products p 
+	LEFT JOIN order_details od 
+	ON p.product_id = od.product_id 
+	left join categories c 
+	on p.category_id  = c.category_id 
+	where od.discount > 0
+) b 
+on o.order_id = b.orderId;
+
+
+6. Select orders for customers that come from London and are shipped via United Package. Remember to use sub queries (not joins). 
+
+Time: ~ 10 min
+Level of Difficulty: low
+
+   select o.* from orders o 
+   where o.customer_id in (select c.customer_id from customers c where c.city = 'London')
+   and o.ship_via in (select s.shipper_id from shippers s where s.company_name = 'United Package')
